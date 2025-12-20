@@ -67,6 +67,5 @@ The **Learning and Wellbeing Hub** is a full‑stack application designed to pro
 ## 👤 Author
 **Patrick Asamoah Adjei**  
 ALX Africa – Back-End Development Program  
-Montreal, Canada (Remote)
 
 ---
