@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+from corsheaders.defaults import default_headers
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +27,8 @@ SECRET_KEY = 'django-insecure-$&3@vgeja87%)23wo-xn@mx^mys0wn%q#x^-ar-#w5y^c0i$&!
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+
 
 
 # Application definition
@@ -61,9 +64,11 @@ REST_FRAMEWORK['PAGE_SIZE'] = 10
 
 from datetime import timedelta
 SIMPLE_JWT = {
-     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
 
 AUTH_USER_MODEL = 'core.User'
 
@@ -78,11 +83,19 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = False  # ❌ Turn this off for security
+
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",   # React dev server
-    "https://yourfrontend.com"
+    "http://localhost:5173",   # ✅ Vite dev server
+    "http://127.0.0.1:5173",   # optional but recommended
+    "https://yourfrontend.com",  # production (optional)
+]
+
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "authorization",
+    "content-type",
 ]
 
 
@@ -151,6 +164,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / "static"]  # ✅ for dev
+STATIC_ROOT = BASE_DIR / "staticfiles"    # ✅ for collectstatic in prod
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'

@@ -11,7 +11,10 @@ from .views import (
     MoodViewSet,
     JournalViewSet,
     ForumPostViewSet,
+    update_email,
+    change_password,
 )
+
 
 # Namespace for reverse lookups
 app_name = "core"
@@ -40,4 +43,6 @@ router.register('forum', ForumPostViewSet, basename='forum')
 urlpatterns = [
     # All API routes under /api/core/
     path('api/core/', include(router.urls)),
+    path("users/update-email/", update_email),
+    path("users/change-password/", change_password),
 ]

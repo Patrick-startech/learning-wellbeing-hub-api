@@ -5,9 +5,15 @@ from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from .serializers import MeSerializer
+from .models import User
 
 from .models import (
-    Book, Transaction, Resource, Quiz, Question,
+    Book, User, Transaction, Resource, Quiz, Question,
     Submission, MentorshipRequest, Mood, Journal, ForumPost
 )
 from .serializers import (
@@ -20,6 +26,39 @@ from .permissions import IsAdmin, IsMentorOrAdmin, IsStudent, ReadOnly, IsOwnerO
 
 User = get_user_model()
 
+
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
+def update_email(request):
+    user = request.user
+    email = request.data.get("email")
+
+    if not email:
+        return Response({"detail": "Email is required"}, status=400)
+
+    user.email = email
+    user.save()
+
+    return Response(MeSerializer(user).data)
+
+
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
+def change_password(request):
+    user = request.user
+    current = request.data.get("current_password")
+    new = request.data.get("new_password")
+
+    if not current or not new:
+        return Response({"detail": "Both current and new password are required"}, status=400)
+
+    if not user.check_password(current):
+        return Response({"detail": "Current password is incorrect"}, status=400)
+
+    user.set_password(new)
+    user.save()
+
+    return Response({"detail": "Password updated successfully"})
 
 # -------------------------
 # User Management
@@ -104,7 +143,7 @@ class TransactionViewSet(viewsets.ReadOnlyModelViewSet):
 class ResourceViewSet(viewsets.ModelViewSet):
     queryset = Resource.objects.all()
     serializer_class = ResourceSerializer
-    permission_classes = [IsMentorOrAdmin]
+    permission_classes = [IsAuthenticated]
 
 
 class QuizViewSet(viewsets.ModelViewSet):
@@ -169,4 +208,7 @@ class ForumPostViewSet(viewsets.ModelViewSet):
 
 
 def home(request):
-    return HttpResponse("Welcome to the Learning & Wellbeing Hub API")
+    if request.user.is_authenticated:
+        return HttpResponse(f"Welcome {request.user.username} to the Learning & Wellbeing Hub API")
+    else:
+        return HttpResponse("Welcome Guest to the Learning & Wellbeing Hub API")

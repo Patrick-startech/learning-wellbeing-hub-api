@@ -24,12 +24,13 @@ class User(AbstractUser):
         ('student', 'Student'),
     ]
 
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='student')
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='student', db_index=True)
     date_of_membership = models.DateField(auto_now_add=True)
     active_status = models.BooleanField(default=True)
+    email = models.EmailField(unique=True)  # ✅ ensure unique emails
 
     def __str__(self):
-        return self.username
+        return f"{self.username} ({self.role})"
 
 
 # -------------------------
@@ -37,28 +38,44 @@ class User(AbstractUser):
 # -------------------------
 
 class Book(models.Model):
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=200, db_index=True)
     author = models.CharField(max_length=200)
     isbn = models.CharField(max_length=13, unique=True)
     published_date = models.DateField()
     copies_available = models.PositiveIntegerField(default=1)
+    genre = models.CharField(max_length=100, blank=True, null=True)
+    summary = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)  # ✅ fixed
 
     def __str__(self):
         return f"{self.title} by {self.author}"
 
+    class Meta:
+        ordering = ["title"]
+
 
 class Transaction(models.Model):
+    STATUS_CHOICES = [
+        ("borrowed", "Borrowed"),
+        ("returned", "Returned"),
+        ("overdue", "Overdue"),
+    ]
+
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='transactions')
     book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='transactions')
     checkout_date = models.DateTimeField(auto_now_add=True)
-    due_date = models.DateTimeField(default=default_due_date)  # ✅ fixed
+    due_date = models.DateTimeField(default=default_due_date)
     return_date = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="borrowed", db_index=True)
 
     def is_overdue(self):
         return self.return_date is None and timezone.now() > self.due_date
 
     def __str__(self):
         return f"{self.user.username} borrowed {self.book.title}"
+
+    class Meta:
+        ordering = ["-checkout_date"]
 
 
 # -------------------------
@@ -69,8 +86,8 @@ class Resource(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
     file_url = models.URLField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)  # ✅ fixed
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="resources")
 
     def __str__(self):
         return self.title
@@ -78,8 +95,8 @@ class Resource(models.Model):
 
 class Quiz(models.Model):
     title = models.CharField(max_length=200)
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="quizzes")
+    created_at = models.DateTimeField(auto_now_add=True)  # ✅ fixed
 
     def __str__(self):
         return self.title
@@ -95,9 +112,9 @@ class Question(models.Model):
 
 
 class Submission(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
-    submitted_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="submissions")
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="submissions")
+    submitted_at = models.DateTimeField(auto_now_add=True)  # ✅ fixed
     score = models.IntegerField(default=0)
 
     def __str__(self):
@@ -111,8 +128,9 @@ class MentorshipRequest(models.Model):
         max_length=20,
         choices=[("pending", "Pending"), ("approved", "Approved"), ("rejected", "Rejected")],
         default="pending",
+        db_index=True,
     )
-    requested_at = models.DateTimeField(auto_now_add=True)
+    requested_at = models.DateTimeField(auto_now_add=True)  # ✅ fixed
 
     def __str__(self):
         return f"{self.student.username} → {self.mentor.username} ({self.status})"
@@ -123,28 +141,33 @@ class MentorshipRequest(models.Model):
 # -------------------------
 
 class Mood(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    mood = models.CharField(max_length=50)  # e.g., "happy", "stressed"
-    logged_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="moods")
+    mood = models.CharField(max_length=50, db_index=True)  # e.g., "happy", "stressed"
+    logged_at = models.DateTimeField(auto_now_add=True)  # ✅ fixed
 
     def __str__(self):
         return f"{self.user.username} - {self.mood}"
 
 
 class Journal(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="journals")
     entry = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)  # ✅ fixed
 
     def __str__(self):
         return f"Journal by {self.user.username} on {self.created_at.date()}"
 
 
 class ForumPost(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts")
     title = models.CharField(max_length=200)
     content = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)  # ✅ fixed
+    updated_at = models.DateTimeField(auto_now=True)      # ✅ fixed
+    likes = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.title
+
+    class Meta:
+        ordering = ["-created_at"]

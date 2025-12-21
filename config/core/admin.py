@@ -1,4 +1,7 @@
 from django.contrib import admin
+from django.contrib.auth import get_user_model
+from django.contrib.auth.admin import UserAdmin
+from django.utils import timezone
 from .models import (
     Book,
     Transaction,
@@ -12,24 +15,57 @@ from .models import (
     ForumPost,
 )
 
+User = get_user_model()
+
 # -------------------------
 # Library models
 # -------------------------
 
 @admin.register(Book)
 class BookAdmin(admin.ModelAdmin):
-    list_display = ("title", "author", "isbn", "published_date", "copies_available")
-    search_fields = ("title", "author", "isbn")
-    list_filter = ("published_date",)
+    list_display = (
+        "title",
+        "author",
+        "isbn",
+        "published_date",
+        "copies_available",
+        "genre",
+    )
+    search_fields = ("title", "author", "isbn", "genre")
+    list_filter = ("published_date", "genre")
     ordering = ("title",)
+
+
+@admin.action(description="Mark selected transactions as returned")
+def mark_as_returned(modeladmin, request, queryset):
+    user = request.user
+    for transaction in queryset.filter(return_date__isnull=True):
+        transaction.return_date = timezone.now()
+        transaction.status = "returned"
+        transaction.book.copies_available += 1
+        transaction.book.save()
+        transaction.save()
+    modeladmin.message_user(
+        request,
+        f"{queryset.count()} transactions marked as returned by {user}."
+    )
 
 
 @admin.register(Transaction)
 class TransactionAdmin(admin.ModelAdmin):
-    list_display = ("user", "book", "checkout_date", "due_date", "return_date", "is_overdue")
-    list_filter = ("checkout_date", "return_date", "due_date")
+    list_display = (
+        "user",
+        "book",
+        "checkout_date",
+        "due_date",
+        "return_date",
+        "status",
+        "is_overdue",
+    )
+    list_filter = ("status", "checkout_date", "return_date", "due_date")
     readonly_fields = ("checkout_date", "due_date", "return_date")
     ordering = ("-checkout_date",)
+    actions = [mark_as_returned]
 
 
 # -------------------------
@@ -66,12 +102,18 @@ class SubmissionAdmin(admin.ModelAdmin):
     ordering = ("-submitted_at",)
 
 
+@admin.action(description="Approve selected mentorship requests")
+def approve_requests(modeladmin, request, queryset):
+    queryset.update(status="approved")
+
+
 @admin.register(MentorshipRequest)
 class MentorshipRequestAdmin(admin.ModelAdmin):
     list_display = ("student", "mentor", "status", "requested_at")
     list_filter = ("status", "requested_at")
     readonly_fields = ("requested_at",)
     ordering = ("-requested_at",)
+    actions = [approve_requests]
 
 
 # -------------------------
@@ -96,7 +138,22 @@ class JournalAdmin(admin.ModelAdmin):
 
 @admin.register(ForumPost)
 class ForumPostAdmin(admin.ModelAdmin):
-    list_display = ("title", "user", "created_at")
+    list_display = ("title", "user", "created_at", "updated_at", "likes")
     search_fields = ("title", "content")
-    readonly_fields = ("created_at",)
+    readonly_fields = ("created_at", "updated_at")
     ordering = ("-created_at",)
+
+
+# -------------------------
+# Custom User Model
+# -------------------------
+
+@admin.register(User)
+class CustomUserAdmin(UserAdmin):
+    list_display = ("username", "email", "role", "is_staff", "is_superuser", "active_status")
+    list_filter = ("role", "is_staff", "is_superuser", "active_status")
+    search_fields = ("username", "email")
+
+    fieldsets = UserAdmin.fieldsets + (
+        ("Role & Status", {"fields": ("role", "active_status")}),
+    )

@@ -16,7 +16,6 @@ Including another URLconf
 
 """
 from django.contrib import admin
-from core.views import home
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import (
@@ -24,47 +23,41 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
-# Import your viewsets from the core app
 from core.views import (
+    home,
     UserViewSet,
     BookViewSet,
     TransactionViewSet,
-    # Add these only once they exist in core/views.py
-    # ResourceViewSet,
-    # QuizViewSet,
-    # SubmissionViewSet,
-    # MoodViewSet,
-    # JournalViewSet,
-    # ForumPostViewSet,
-    # MentorshipRequestViewSet,
+    ResourceViewSet,
+    QuizViewSet,
+    QuestionViewSet,
+    SubmissionViewSet,
+    MoodViewSet,
+    JournalViewSet,
+    ForumPostViewSet,
+    MentorshipRequestViewSet,
 )
 
-# Register API routes
-router = DefaultRouter()
-router.register('users', UserViewSet, basename='user')
-router.register('books', BookViewSet, basename='book')
-router.register('transactions', TransactionViewSet, basename='transaction')
 
-# Uncomment these once the viewsets are implemented
-# router.register('resources', ResourceViewSet, basename='resource')
-# router.register('quizzes', QuizViewSet, basename='quiz')
-# router.register('submissions', SubmissionViewSet, basename='submission')
-# router.register('moods', MoodViewSet, basename='mood')
-# router.register('journals', JournalViewSet, basename='journal')
-# router.register('forum', ForumPostViewSet, basename='forum')
-# router.register('mentorship', MentorshipRequestViewSet, basename='mentorship')
+router = DefaultRouter()
+router.register("users", UserViewSet, basename="user")
+router.register("books", BookViewSet, basename="book")
+router.register("transactions", TransactionViewSet, basename="transaction")
+router.register("resources", ResourceViewSet, basename="resource")  # ✅ ENABLED
+router.register("quizzes", QuizViewSet, basename="quiz")
+router.register("questions", QuestionViewSet, basename="question")
+router.register("submissions", SubmissionViewSet, basename="submission")
+router.register("moods", MoodViewSet, basename="mood")
+router.register("journals", JournalViewSet, basename="journal")
+router.register("forum", ForumPostViewSet, basename="forum")
+router.register("mentorship", MentorshipRequestViewSet, basename="mentorship")
+
 
 urlpatterns = [
-    path('', home, name='home'),   # ✅ now / will work
-    # Admin panel
-    path('admin/', admin.site.urls),
-
-    # Authentication endpoints (JWT)
-    path('api/auth/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-
-    # Core app endpoints
-    path('api/', include(router.urls)),
-
-    path('', include('core.urls')),
+    path("", home, name="home"),
+    path("admin/", admin.site.urls),
+    path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("api/", include(router.urls)),
+    path("api/", include("core.urls")),
 ]
