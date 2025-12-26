@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'django_filters',
     'corsheaders',   # if you need cross-origin requests 
+    'drf_spectacular',
+    'drf_spectacular_sidecar',
 ]
 
 REST_FRAMEWORK = {
@@ -56,11 +58,24 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+   
 }
 
 REST_FRAMEWORK['DEFAULT_PAGINATION_CLASS'] = 'rest_framework.pagination.PageNumberPagination'
 REST_FRAMEWORK['PAGE_SIZE'] = 10
 
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Learning & Wellbeing Hub API',
+    'DESCRIPTION': 'API documentation for the Learning & Wellbeing Hub project.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+
+    # Recommended 
+    'COMPONENT_SPLIT_REQUEST': True,
+}
 
 from datetime import timedelta
 SIMPLE_JWT = {

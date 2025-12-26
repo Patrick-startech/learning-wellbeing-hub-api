@@ -22,6 +22,11 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularSwaggerView,
+    SpectacularRedocView,
+)
 
 from core.views import (
     home,
@@ -38,12 +43,12 @@ from core.views import (
     MentorshipRequestViewSet,
 )
 
-
+# Routers
 router = DefaultRouter()
 router.register("users", UserViewSet, basename="user")
 router.register("books", BookViewSet, basename="book")
 router.register("transactions", TransactionViewSet, basename="transaction")
-router.register("resources", ResourceViewSet, basename="resource")  # ✅ ENABLED
+router.register("resources", ResourceViewSet, basename="resource")
 router.register("quizzes", QuizViewSet, basename="quiz")
 router.register("questions", QuestionViewSet, basename="question")
 router.register("submissions", SubmissionViewSet, basename="submission")
@@ -52,12 +57,35 @@ router.register("journals", JournalViewSet, basename="journal")
 router.register("forum", ForumPostViewSet, basename="forum")
 router.register("mentorship", MentorshipRequestViewSet, basename="mentorship")
 
-
 urlpatterns = [
+    # Home
     path("", home, name="home"),
+
+    # Admin
     path("admin/", admin.site.urls),
+
+    # JWT Auth
     path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+
+    # API routes
     path("api/", include(router.urls)),
     path("api/", include("core.urls")),
+
+    # OpenAPI schema
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+
+    # Swagger UI
+    path(
+        "api/docs/",
+        SpectacularSwaggerView.as_view(url_name="schema"),
+        name="swagger-ui",
+    ),
+
+    # ReDoc UI
+    path(
+        "api/redoc/",
+        SpectacularRedocView.as_view(url_name="schema"),
+        name="redoc",
+    ),
 ]

@@ -1,17 +1,14 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from .serializers import MeSerializer
-from .models import User
+from drf_spectacular.utils import extend_schema, OpenApiExample
 
+from .serializers import MeSerializer
 from .models import (
     Book, User, Transaction, Resource, Quiz, Question,
     Submission, MentorshipRequest, Mood, Journal, ForumPost
@@ -26,7 +23,20 @@ from .permissions import IsAdmin, IsMentorOrAdmin, IsStudent, ReadOnly, IsOwnerO
 
 User = get_user_model()
 
+# -------------------------
+# Account Management
+# -------------------------
 
+@extend_schema(
+    summary="Update user email",
+    tags=["Account"],
+    examples=[
+        OpenApiExample(
+            "Example request",
+            value={"email": "newemail@example.com"},
+        )
+    ],
+)
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
 def update_email(request):
@@ -42,6 +52,19 @@ def update_email(request):
     return Response(MeSerializer(user).data)
 
 
+@extend_schema(
+    summary="Change user password",
+    tags=["Account"],
+    examples=[
+        OpenApiExample(
+            "Example request",
+            value={
+                "current_password": "oldpass123",
+                "new_password": "newpass456"
+            },
+        )
+    ],
+)
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
 def change_password(request):
@@ -60,10 +83,12 @@ def change_password(request):
 
     return Response({"detail": "Password updated successfully"})
 
+
 # -------------------------
 # User Management
 # -------------------------
 
+@extend_schema(tags=["Users"])
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -78,6 +103,7 @@ class UserViewSet(viewsets.ModelViewSet):
 # Library Management
 # -------------------------
 
+@extend_schema(tags=["Library"])
 class BookViewSet(viewsets.ModelViewSet):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
@@ -94,6 +120,10 @@ class BookViewSet(viewsets.ModelViewSet):
             return [IsStudent()]
         return [ReadOnly()]
 
+    @extend_schema(
+        summary="Borrow a book",
+        tags=["Library"],
+    )
     @action(detail=True, methods=['post'])
     def borrow(self, request):
         book = self.get_object()
@@ -108,6 +138,10 @@ class BookViewSet(viewsets.ModelViewSet):
         book.save()
         return Response({"message": f"You borrowed '{book.title}' successfully"}, status=status.HTTP_200_OK)
 
+    @extend_schema(
+        summary="Return a borrowed book",
+        tags=["Library"],
+    )
     @action(detail=True, methods=['post'])
     def return_book(self, request):
         book = self.get_object()
@@ -125,6 +159,7 @@ class BookViewSet(viewsets.ModelViewSet):
         return Response({"message": f"You returned '{book.title}' successfully"}, status=status.HTTP_200_OK)
 
 
+@extend_schema(tags=["Library"])
 class TransactionViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
@@ -140,24 +175,28 @@ class TransactionViewSet(viewsets.ReadOnlyModelViewSet):
 # Learning Management
 # -------------------------
 
+@extend_schema(tags=["Resources"])
 class ResourceViewSet(viewsets.ModelViewSet):
     queryset = Resource.objects.all()
     serializer_class = ResourceSerializer
     permission_classes = [IsAuthenticated]
 
 
+@extend_schema(tags=["Quizzes"])
 class QuizViewSet(viewsets.ModelViewSet):
     queryset = Quiz.objects.all()
     serializer_class = QuizSerializer
     permission_classes = [IsMentorOrAdmin]
 
 
+@extend_schema(tags=["Quizzes"])
 class QuestionViewSet(viewsets.ModelViewSet):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
     permission_classes = [IsMentorOrAdmin]
 
 
+@extend_schema(tags=["Quizzes"])
 class SubmissionViewSet(viewsets.ModelViewSet):
     queryset = Submission.objects.all()
     serializer_class = SubmissionSerializer
@@ -170,6 +209,7 @@ class SubmissionViewSet(viewsets.ModelViewSet):
         return Submission.objects.filter(user=user)
 
 
+@extend_schema(tags=["Mentorship"])
 class MentorshipRequestViewSet(viewsets.ModelViewSet):
     queryset = MentorshipRequest.objects.all()
     serializer_class = MentorshipRequestSerializer
@@ -180,6 +220,7 @@ class MentorshipRequestViewSet(viewsets.ModelViewSet):
 # Wellbeing Management
 # -------------------------
 
+@extend_schema(tags=["Mood"])
 class MoodViewSet(viewsets.ModelViewSet):
     queryset = Mood.objects.all()
     serializer_class = MoodSerializer
@@ -189,6 +230,15 @@ class MoodViewSet(viewsets.ModelViewSet):
         return Mood.objects.filter(user=self.request.user)
 
 
+@extend_schema(
+    tags=["Journal"],
+    examples=[
+        OpenApiExample(
+            "Example journal entry",
+            value={"title": "My day", "content": "Today was great"},
+        )
+    ],
+)
 class JournalViewSet(viewsets.ModelViewSet):
     queryset = Journal.objects.all()
     serializer_class = JournalSerializer
@@ -201,11 +251,16 @@ class JournalViewSet(viewsets.ModelViewSet):
         return Journal.objects.filter(user=user)
 
 
+@extend_schema(tags=["Forum"])
 class ForumPostViewSet(viewsets.ModelViewSet):
     queryset = ForumPost.objects.all()
     serializer_class = ForumPostSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+
+# -------------------------
+# Home
+# -------------------------
 
 def home(request):
     if request.user.is_authenticated:
