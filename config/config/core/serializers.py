@@ -1,7 +1,5 @@
 from rest_framework import serializers
-from django.core import exceptions
 from django.contrib.auth import get_user_model
-from django.contrib.auth.password_validation import validate_password
 from .models import (
     Book,
     Transaction,
@@ -26,8 +24,7 @@ User = get_user_model()
 class MeSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'is_admin']
-
+        fields = ["id", "username", "email", "is_admin"]
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -38,11 +35,8 @@ class UserSerializer(serializers.ModelSerializer):
             'email',
             'role',
             'date_of_membership',
-            'active_status',
-            'phone_number',
-            'country',
+            'active_status'
         ]
-        read_only_fields = ['id']
 
 
 class BookSerializer(serializers.ModelSerializer):
@@ -55,9 +49,9 @@ class BookSerializer(serializers.ModelSerializer):
             'isbn',
             'published_date',
             'copies_available',
-            'genre',
-            'summary',
-            'created_at',
+            'genre',        # ✅ new field
+            'summary',      # ✅ new field
+            'created_at'    # ✅ new field
         ]
         read_only_fields = ['created_at']
 
@@ -76,8 +70,8 @@ class TransactionSerializer(serializers.ModelSerializer):
             'checkout_date',
             'due_date',
             'return_date',
-            'status',
-            'is_overdue',
+            'status',       # ✅ new field
+            'is_overdue'
         ]
         read_only_fields = ['checkout_date', 'due_date', 'return_date', 'is_overdue']
 
@@ -100,52 +94,13 @@ class ResourceSerializer(serializers.ModelSerializer):
             'description',
             'file_url',
             'created_at',
-            'created_by',
+            'created_by'
         ]
         read_only_fields = ['created_at', 'created_by']
 
     def create(self, validated_data):
-        validated_data['created_by'] = self.context['request'].user
+        validated_data["created_by"] = self.context["request"].user
         return super().create(validated_data)
-
-
-class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
-    phone_number = serializers.CharField(required=False, allow_blank=True)
-    country = serializers.CharField(required=True)
-
-    class Meta:
-        model = User
-        fields = [
-            'id',
-            'username',
-            'email',
-            'password',
-            'role',
-            'phone_number',
-            'country',
-        ]
-
-    def validate_password(self, value):
-        user = User(
-            username=self.initial_data.get('username'),
-            email=self.initial_data.get('email'),
-        )
-        try:
-            validate_password(password=value, user=user)
-        except exceptions.ValidationError as e:
-            raise serializers.ValidationError(list(e.messages))
-        return value
-
-    def create(self, validated_data):
-        password = validated_data.pop('password')
-        user = User(**validated_data)
-        user.set_password(password)
-        if hasattr(user, 'is_email_verified'):
-            user.is_email_verified = False
-        user.save()
-        return user
-
 
 class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -163,18 +118,14 @@ class QuizSerializer(serializers.ModelSerializer):
             'id',
             'title',
             'created_by',
-            'description',
-            'subject',
-            'duration',
-            'created_at',   # FIXED: missing comma before
-            'questions',
+            'created_at',
+            'questions'
         ]
         read_only_fields = ['created_at', 'created_by']
-
+    
     def create(self, validated_data):
-        validated_data['created_by'] = self.context['request'].user
+        validated_data["created_by"] = self.context["request"].user
         return super().create(validated_data)
-
 
 class SubmissionSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(read_only=True)
@@ -187,7 +138,7 @@ class SubmissionSerializer(serializers.ModelSerializer):
             'user',
             'quiz',
             'submitted_at',
-            'score',
+            'score'
         ]
         read_only_fields = ['submitted_at', 'score']
 
@@ -203,7 +154,7 @@ class MentorshipRequestSerializer(serializers.ModelSerializer):
             'student',
             'mentor',
             'status',
-            'requested_at',
+            'requested_at'
         ]
         read_only_fields = ['requested_at', 'student']
 
@@ -221,14 +172,13 @@ class MoodSerializer(serializers.ModelSerializer):
             'id',
             'user',
             'mood',
-            'logged_at',
+            'logged_at'
         ]
         read_only_fields = ['logged_at', 'user']
-
+    
     def create(self, validated_data):
-        validated_data['user'] = self.context['request'].user
+        validated_data["user"] = self.context["request"].user
         return super().create(validated_data)
-
 
 class JournalSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(read_only=True)
@@ -239,14 +189,13 @@ class JournalSerializer(serializers.ModelSerializer):
             'id',
             'user',
             'entry',
-            'created_at',
+            'created_at'
         ]
         read_only_fields = ['created_at', 'user']
-
+    
     def create(self, validated_data):
-        validated_data['user'] = self.context['request'].user
+        validated_data["user"] = self.context["request"].user
         return super().create(validated_data)
-
 
 class ForumPostSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(read_only=True)
@@ -259,11 +208,11 @@ class ForumPostSerializer(serializers.ModelSerializer):
             'title',
             'content',
             'created_at',
-            'updated_at',
-            'likes',
+            'updated_at',   # ✅ new field
+            'likes'         # ✅ new field
         ]
         read_only_fields = ['created_at', 'updated_at', 'user']
-
+    
     def create(self, validated_data):
-        validated_data['user'] = self.context['request'].user
+        validated_data["user"] = self.context["request"].user
         return super().create(validated_data)

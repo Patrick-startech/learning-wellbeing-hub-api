@@ -30,9 +30,6 @@ from drf_spectacular.views import (
 
 from core.views import (
     home,
-    register,
-    LoginView,
-    RefreshTokenView,
     UserViewSet,
     BookViewSet,
     TransactionViewSet,
@@ -44,7 +41,6 @@ from core.views import (
     JournalViewSet,
     ForumPostViewSet,
     MentorshipRequestViewSet,
-    auth_status,
 )
 
 # Routers
@@ -92,9 +88,4 @@ urlpatterns = [
         SpectacularRedocView.as_view(url_name="schema"),
         name="redoc",
     ),
-
-    path("api/register/", register, name="register"),
-    path("api/token/", LoginView.as_view(), name="token_obtain_pair"),
-    path("api/token/refresh/", RefreshTokenView.as_view(), name="token_refresh"),
-    path('api/auth-status/', auth_status),
 ]

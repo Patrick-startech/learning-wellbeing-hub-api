@@ -10,12 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
-import os
 from pathlib import Path
 from corsheaders.defaults import default_headers
-from dotenv import load_dotenv 
-
-load_dotenv() # Load .env variables
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,13 +22,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY', 'yof@oltyrv5=m8y+kmym%=0*vv=(gu&_q0s*uef2yuks+!$f0@')
+SECRET_KEY = 'django-insecure-$&3@vgeja87%)23wo-xn@mx^mys0wn%q#x^-ar-#w5y^c0i$&!'
 
 # SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = True
 
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 
 # Application definition
@@ -72,27 +68,14 @@ REST_FRAMEWORK['PAGE_SIZE'] = 10
 
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "Learning & Wellbeing Hub API",
-    "DESCRIPTION": "API documentation for the Learning & Wellbeing Hub project.",
-    "VERSION": "1.0.0",
-    "SERVE_INCLUDE_SCHEMA": False,
-    "COMPONENT_SPLIT_REQUEST": True,
-    "SECURITY": [
-        {"BearerAuth": []},
-    ],
-    "SECURITY_SCHEMES": {
-        "BearerAuth": {
-            "type": "http",
-            "scheme": "bearer",
-            "bearerFormat": "JWT",
-        }
-    },
+    'TITLE': 'Learning & Wellbeing Hub API',
+    'DESCRIPTION': 'API documentation for the Learning & Wellbeing Hub project.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+
+    # Recommended 
+    'COMPONENT_SPLIT_REQUEST': True,
 }
-
-SPECTACULAR_SETTINGS['AUTHENTICATION_WHITELIST'] = [
-    'rest_framework_simplejwt.authentication.JWTAuthentication',
-]
-
 
 from datetime import timedelta
 SIMPLE_JWT = {
@@ -115,7 +98,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True # ❌ Turn this off for security
+CORS_ALLOW_ALL_ORIGINS = False  # ❌ Turn this off for security
 
 
 CORS_ALLOWED_ORIGINS = [
@@ -196,13 +179,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-
-# Static files
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'    # ✅ for collectstatic in prod
-
-# ✅ for dev
-# STATICFILES_DIRS = [ BASE_DIR / 'static',]
+STATICFILES_DIRS = [BASE_DIR / "static"]  # ✅ for dev
+STATIC_ROOT = BASE_DIR / "staticfiles"    # ✅ for collectstatic in prod
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'

@@ -9,7 +9,7 @@ import datetime
 # -------------------------
 
 def default_due_date():
-    """Default due date is 14 days after checkout."""
+    '''Default due date is 14 days after checkout.'''
     return timezone.now() + datetime.timedelta(days=14)
 
 
@@ -27,10 +27,13 @@ class User(AbstractUser):
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='student', db_index=True)
     date_of_membership = models.DateField(auto_now_add=True)
     active_status = models.BooleanField(default=True)
-    email = models.EmailField(unique=True)  # ✅ ensure unique emails
-
+    email = models.EmailField(unique=True)
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
+    country = models.CharField(max_length=100, blank=True, null=True)
+    is_email_verified = models.BooleanField(default=False)
+    
     def __str__(self):
-        return f"{self.username} ({self.role})"
+        return f'{self.username} ({self.role})'
 
 
 # -------------------------
@@ -45,20 +48,20 @@ class Book(models.Model):
     copies_available = models.PositiveIntegerField(default=1)
     genre = models.CharField(max_length=100, blank=True, null=True)
     summary = models.TextField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)  # ✅ fixed
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.title} by {self.author}"
+        return f'{self.title} by {self.author}'
 
     class Meta:
-        ordering = ["title"]
+        ordering = ['title']
 
 
 class Transaction(models.Model):
     STATUS_CHOICES = [
-        ("borrowed", "Borrowed"),
-        ("returned", "Returned"),
-        ("overdue", "Overdue"),
+        ('borrowed', 'Borrowed'),
+        ('returned', 'Returned'),
+        ('overdue', 'Overdue'),
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='transactions')
@@ -66,16 +69,16 @@ class Transaction(models.Model):
     checkout_date = models.DateTimeField(auto_now_add=True)
     due_date = models.DateTimeField(default=default_due_date)
     return_date = models.DateTimeField(null=True, blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="borrowed", db_index=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='borrowed', db_index=True)
 
     def is_overdue(self):
         return self.return_date is None and timezone.now() > self.due_date
 
     def __str__(self):
-        return f"{self.user.username} borrowed {self.book.title}"
+        return f'{self.user.username} borrowed {self.book.title}'
 
     class Meta:
-        ordering = ["-checkout_date"]
+        ordering = ['-checkout_date']
 
 
 # -------------------------
@@ -86,54 +89,73 @@ class Resource(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
     file_url = models.URLField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)  # ✅ fixed
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="resources")
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='resources')
 
     def __str__(self):
         return self.title
 
 
 class Quiz(models.Model):
-    title = models.CharField(max_length=200)
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="quizzes")
-    created_at = models.DateTimeField(auto_now_add=True)  # ✅ fixed
+    SUBJECT_CHOICES = [
+        ('general', 'General'),
+        ('mathematics', 'Mathematics'),
+        ('science', 'Science'),
+        ('english', 'English'),
+        ('biology', 'Biology'),
+        ('physics', 'Physics'),
+        ('chemistry', 'Chemistry'),
+        ('history', 'History'),
+    ]
+
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    subject = models.CharField(max_length=50, choices=SUBJECT_CHOICES, default='general')
+    duration = models.IntegerField(default=10, help_text='Duration in minutes')
+
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='quizzes'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.title
 
 
 class Question(models.Model):
-    quiz = models.ForeignKey(Quiz, related_name="questions", on_delete=models.CASCADE)
+    quiz = models.ForeignKey(Quiz, related_name='questions', on_delete=models.CASCADE)
     text = models.TextField()
     correct_answer = models.CharField(max_length=200)
 
     def __str__(self):
-        return f"Q: {self.text[:50]}..."
+        return f'Q: {self.text[:50]}...'
 
 
 class Submission(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="submissions")
-    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="submissions")
-    submitted_at = models.DateTimeField(auto_now_add=True)  # ✅ fixed
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='submissions')
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='submissions')
+    submitted_at = models.DateTimeField(auto_now_add=True)
     score = models.IntegerField(default=0)
 
     def __str__(self):
-        return f"{self.user.username} - {self.quiz.title} ({self.score})"
+        return f'{self.user.username} - {self.quiz.title} ({self.score})'
 
 
 class MentorshipRequest(models.Model):
-    student = models.ForeignKey(User, related_name="requests", on_delete=models.CASCADE)
-    mentor = models.ForeignKey(User, related_name="mentees", on_delete=models.CASCADE)
+    student = models.ForeignKey(User, related_name='requests', on_delete=models.CASCADE)
+    mentor = models.ForeignKey(User, related_name='mentees', on_delete=models.CASCADE)
     status = models.CharField(
         max_length=20,
-        choices=[("pending", "Pending"), ("approved", "Approved"), ("rejected", "Rejected")],
-        default="pending",
+        choices=[('pending', 'Pending'), ('approved', 'Approved'), ('rejected', 'Rejected')],
+        default='pending',
         db_index=True,
     )
-    requested_at = models.DateTimeField(auto_now_add=True)  # ✅ fixed
+    requested_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.student.username} → {self.mentor.username} ({self.status})"
+        return f'{self.student.username} → {self.mentor.username} ({self.status})'
 
 
 # -------------------------
@@ -141,33 +163,33 @@ class MentorshipRequest(models.Model):
 # -------------------------
 
 class Mood(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="moods")
-    mood = models.CharField(max_length=50, db_index=True)  # e.g., "happy", "stressed"
-    logged_at = models.DateTimeField(auto_now_add=True)  # ✅ fixed
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='moods')
+    mood = models.CharField(max_length=50, db_index=True)
+    logged_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.mood}"
+        return f'{self.user.username} - {self.mood}'
 
 
 class Journal(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="journals")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='journals')
     entry = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)  # ✅ fixed
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Journal by {self.user.username} on {self.created_at.date()}"
+        return f'Journal by {self.user.username} on {self.created_at.date()}'
 
 
 class ForumPost(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
     title = models.CharField(max_length=200)
     content = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)  # ✅ fixed
-    updated_at = models.DateTimeField(auto_now=True)      # ✅ fixed
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     likes = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.title
 
     class Meta:
-        ordering = ["-created_at"]
+        ordering = ['-created_at']

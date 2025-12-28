@@ -1,6 +1,4 @@
 from django.urls import path, include
-from .views import register
-from .views import LoginView
 from rest_framework.routers import DefaultRouter
 from .views import (
     UserViewSet,
@@ -45,8 +43,6 @@ router.register('forum', ForumPostViewSet, basename='forum')
 urlpatterns = [
     # All API routes under /api/core/
     path('api/core/', include(router.urls)),
-    path('users/update-email/', update_email),
-    path('users/change-password/', change_password),
-    path('register/', register, name='register'),
-    path('login/', LoginView.as_view(), name='login'),  
+    path("users/update-email/", update_email),
+    path("users/change-password/", change_password),
 ]
