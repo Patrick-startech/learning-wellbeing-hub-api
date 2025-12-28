@@ -83,14 +83,6 @@ The backend exposes REST endpoints, while the frontend consumes them through a c
 - Error handling & fallback UI  
 
 ---
-
-# ⚙️ Installation & Setup
-
-## 1️⃣ Clone the repository
-```bash
-git clone https://github.com/Patrick-startech/learning-wellbeing-hub.git
-cd learning-wellbeing-hub
-
 ## 👤 Author
 
 **Patrick Asamoah Adjei**  
@@ -98,4 +90,10 @@ ALX Africa – Back-End Development Program
 Focused on building secure, scalable, and production‑ready backend and frontend systems.
 
 
+# ⚙️ Installation & Setup
+
+## 1️⃣ Clone the repository
+```bash
+git clone https://github.com/Patrick-startech/learning-wellbeing-hub.git
+cd learning-wellbeing-hub
 ---
