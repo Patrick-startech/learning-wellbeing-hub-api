@@ -1,71 +1,101 @@
-# Learning and Wellbeing Hub
+# 🌱 Learning & Wellbeing Hub – Full‑Stack Project
 
-## 📌 Project Overview
-The **Learning and Wellbeing Hub** is a full‑stack application designed to provide resources, tools, and support for learners. It combines a Django backend with a React frontend, secured by JWT authentication, and aims to deliver a seamless user experience for managing educational and wellbeing resources.
-
----
-
-## ✅ Progress So Far
-
-### Backend (Django)
-- Initialized project repository and configured backend environment.
-- Designed Django models with audit fields and relationships.
-- Applied migrations successfully and ensured smooth database integration.
-- Built core API endpoints for:
-  - User authentication (login, refresh, logout).
-  - Resource management (books/resources listing).
-- Implemented JWT authentication with access and refresh tokens.
-
-### Frontend (React)
-- Set up React environment and project structure.
-- Built core components:
-  - **Login** – handles authentication and token storage.
-  - **Navbar** – provides logout functionality and navigation.
-  - **BookList** – displays resources fetched from backend.
-- Integrated frontend with backend services using a centralized API layer.
-- Implemented conditional rendering for authenticated vs. unauthenticated states.
-- Debugged blank page and JSX errors by cleaning up `App.js` and wrapping in `BrowserRouter`.
-
-### API Layer (`services/api.js`)
-- Created a **global fetch wrapper (`apiFetch`)** that:
-  - Automatically attaches JWT tokens from `localStorage`.
-  - Refreshes expired tokens using the refresh token.
-  - Retries failed requests after refresh.
-- Centralized API calls (`getBooks`, `addBook`, `login`, `logout`) for cleaner code.
+The **Learning & Wellbeing Hub** is a full‑stack platform designed to support learners with curated educational resources, wellbeing tools, and personalized user experiences.  
+This project includes both the **Django REST Framework backend** and the **React frontend**, working together to deliver a seamless, secure, and scalable application.
 
 ---
 
-## ⚡ Challenges and Solutions
-- **Migration Errors:** Fixed by reviewing models, correcting field types, and re‑running migrations.
-- **Token Handling:** Standardized token storage (`access_token`, `refresh_token`) and centralized logic in `apiFetch`.
-- **Frontend Rendering Errors:** Resolved blank page issues by cleaning JSX, updating `App.js`, and adding error boundaries.
-- **API Consistency:** Reduced duplication by implementing a global fetch wrapper.
+## 🚀 Project Overview
+
+The Hub provides a centralized space where learners can:
+
+- Access learning materials  
+- Explore wellbeing resources  
+- Manage their accounts  
+- Track progress (future feature)  
+- Interact with a clean, modern UI  
+
+The system is built with a **modular architecture**, separating backend and frontend into independent but integrated services.
 
 ---
 
-## 🚀 Next Steps (Week 5 – Final Week)
-- Complete remaining API endpoints for full functionality of the Learning and Wellbeing Hub.
-- Expand frontend features:
-  - Resource creation, editing, and management.
-- Implement **Private Routes** in React Router for authenticated access.
-- Add error boundaries and user‑friendly messages.
-- Write unit tests for backend models and API endpoints.
-- Polish UI/UX for professional presentation.
-- Prepare final documentation and README updates.
+# 🧩 System Architecture
+
+The backend exposes REST endpoints, while the frontend consumes them through a centralized API service layer.
 
 ---
 
-## 🛠️ Tech Stack
-- **Backend:** Django, Django REST Framework
-- **Frontend:** React, JSX
-- **Authentication:** JWT (Access + Refresh tokens)
-- **Database:** SQLite/PostgreSQL (depending on deployment)
-- **Tools:** ESLint, Prettier, Git/GitHub
+# 🔐 Backend Features (Django REST Framework)
+
+### ✔ Authentication & Authorization
+- JWT login & token refresh  
+- Secure user registration  
+- Role-based access (admin, student, etc.)  
+- Protected routes for authenticated users  
+
+### ✔ User Account Management
+- Update email  
+- Change password  
+- View authenticated user profile  
+- Admin CRUD operations on users  
+
+### ✔ Resource Management
+- List learning resources  
+- Add/edit/delete resources (admin only)  
+- Serializer-driven validation  
+- Clean API response structure  
+
+### ✔ API Documentation
+- Auto-generated OpenAPI schema  
+- Swagger UI & Redoc via **drf-spectacular**  
+- Example requests for every endpoint  
+
+### ✔ Deployment Ready
+- `runtime.txt`  
+- `build.sh`  
+- `.env` support  
+- Production settings separation  
 
 ---
+
+# 🎨 Frontend Features (React)
+
+### ✔ Authentication UI
+- Login form  
+- Token storage (localStorage)  
+- Auto-refresh token logic  
+- Protected routes  
+
+### ✔ User Interface
+- Dashboard layout  
+- Navbar with logout  
+- Conditional rendering for authenticated users  
+- Clean component structure  
+
+### ✔ Resource Display
+- Fetch books/resources from backend  
+- Display in responsive UI  
+- Future: search, filter, categories  
+
+### ✔ API Integration
+- Centralized `apiFetch` wrapper  
+- Automatic token refresh  
+- Error handling & fallback UI  
+
+---
+
+# ⚙️ Installation & Setup
+
+## 1️⃣ Clone the repository
+```bash
+git clone https://github.com/Patrick-startech/learning-wellbeing-hub.git
+cd learning-wellbeing-hub
 
 ## 👤 Author
+
 **Patrick Asamoah Adjei**  
 ALX Africa – Back-End Development Program  
+Focused on building secure, scalable, and production‑ready backend and frontend systems.
+
 
 ---
