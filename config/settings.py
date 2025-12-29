@@ -50,8 +50,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'django_filters',
     'corsheaders',   # if you need cross-origin requests 
-    'drf_spectacular',
-    'drf_spectacular_sidecar',
+    'drf_spectacular',  # 'drf_spectacular_sidecar',
 ]
 
 REST_FRAMEWORK = {
