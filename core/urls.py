@@ -1,8 +1,8 @@
 from django.urls import path, include
-from .views import register
-from .views import LoginView
 from rest_framework.routers import DefaultRouter
 from .views import (
+    register,
+    LoginView,
     UserViewSet,
     BookViewSet,
     TransactionViewSet,
@@ -17,11 +17,9 @@ from .views import (
     change_password,
 )
 
-
-# Namespace for reverse lookups
 app_name = "core"
 
-# Register all core viewsets
+# DRF Router
 router = DefaultRouter()
 
 # Library endpoints
@@ -43,10 +41,9 @@ router.register('journals', JournalViewSet, basename='journal')
 router.register('forum', ForumPostViewSet, basename='forum')
 
 urlpatterns = [
-    # All API routes under /api/core/
-    path('api/core/', include(router.urls)),
+    path('', include(router.urls)),  # <-- CLEAN: no prefix here
     path('users/update-email/', update_email),
     path('users/change-password/', change_password),
     path('register/', register, name='register'),
-    path('login/', LoginView.as_view(), name='login'),  
+    path('login/', LoginView.as_view(), name='login'),
 ]
