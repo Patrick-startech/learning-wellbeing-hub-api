@@ -23,7 +23,7 @@ from .serializers import (
     SubmissionSerializer, MentorshipRequestSerializer,
     MoodSerializer, JournalSerializer, ForumPostSerializer
 )
-from .permissions import IsAdmin, IsMentorOrAdmin, IsStudent, ReadOnly, IsOwnerOrAdmin
+from .permissions import IsAdmin, IsMentorOrAdmin, IsStudent,IsMentorAdminOrReadOnly, ReadOnly, IsOwnerOrAdmin
 
 User = get_user_model()
 
@@ -286,15 +286,14 @@ class ResourceViewSet(viewsets.ModelViewSet):
 class QuizViewSet(viewsets.ModelViewSet):
     queryset = Quiz.objects.all()
     serializer_class = QuizSerializer
-    permission_classes = [IsMentorOrAdmin]
+    permission_classes = [IsMentorAdminOrReadOnly]
 
 
 @extend_schema(tags=['Quizzes'])
 class QuestionViewSet(viewsets.ModelViewSet):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
-    permission_classes = [IsMentorOrAdmin]
-
+    permission_classes = [IsMentorAdminOrReadOnly]
 
 @extend_schema(tags=['Quizzes'])
 class SubmissionViewSet(viewsets.ModelViewSet):
@@ -379,3 +378,5 @@ def home(request):
         if username
         else 'Welcome to the Learning & Wellbeing Hub API'
     )
+
+
