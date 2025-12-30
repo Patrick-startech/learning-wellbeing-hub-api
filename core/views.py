@@ -114,8 +114,17 @@ def change_password(request):
 def register(request):
     serializer = RegisterSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    user = serializer.save()
 
+    # Save user using serializer logic
+    user = serializer.save(
+        role=request.data.get('role', 'user'),      # default role
+        country=request.data.get('country', None),
+        phone_number=request.data.get('phone_number', None),
+        is_active=True,
+        is_staff=False                              # prevent admin access
+    )
+
+    # Generate JWT tokens
     refresh = RefreshToken.for_user(user)
 
     return Response(
@@ -136,7 +145,6 @@ def register(request):
         },
         status=status.HTTP_201_CREATED,
     )
-
 
 @extend_schema(
     summary='Obtain JWT access and refresh tokens',
