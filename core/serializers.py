@@ -156,6 +156,7 @@ class QuestionSerializer(serializers.ModelSerializer):
 class QuizSerializer(serializers.ModelSerializer):
     created_by = serializers.StringRelatedField(read_only=True)
     questions = QuestionSerializer(many=True, read_only=True)
+    subject_label = serializers.SerializerMethodField()
 
     class Meta:
         model = Quiz
@@ -165,16 +166,19 @@ class QuizSerializer(serializers.ModelSerializer):
             'created_by',
             'description',
             'subject',
+            'subject_label',   # ✅ new field
             'duration',
-            'created_at',   # FIXED: missing comma before
+            'created_at',
             'questions',
         ]
         read_only_fields = ['created_at', 'created_by']
 
+    def get_subject_label(self, obj):
+        return obj.get_subject_display()
+
     def create(self, validated_data):
         validated_data['created_by'] = self.context['request'].user
         return super().create(validated_data)
-
 
 class SubmissionSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(read_only=True)
