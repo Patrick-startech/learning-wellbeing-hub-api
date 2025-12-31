@@ -155,7 +155,7 @@ class QuestionSerializer(serializers.ModelSerializer):
 
 class QuizSerializer(serializers.ModelSerializer):
     created_by = serializers.StringRelatedField(read_only=True)
-    questions = QuestionSerializer(many=True, read_only=True)
+    questions = QuestionSerializer(many=True)
     subject_label = serializers.SerializerMethodField()
 
     class Meta:
@@ -166,7 +166,7 @@ class QuizSerializer(serializers.ModelSerializer):
             'created_by',
             'description',
             'subject',
-            'subject_label',   # ✅ new field
+            'subject_label',
             'duration',
             'created_at',
             'questions',
@@ -177,8 +177,15 @@ class QuizSerializer(serializers.ModelSerializer):
         return obj.get_subject_display()
 
     def create(self, validated_data):
-        validated_data['created_by'] = self.context['request'].user
-        return super().create(validated_data)
+        questions_data = validated_data.pop('questions', [])
+        quiz = Quiz.objects.create(
+            created_by=self.context['request'].user,
+            **validated_data
+        )
+        for question in questions_data:
+            Question.objects.create(quiz=quiz, **question)
+        return quiz
+
 
 class SubmissionSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(read_only=True)
