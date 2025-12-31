@@ -150,7 +150,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
-        fields = ['id', 'quiz', 'text', 'correct_answer']
+        fields = ['id', 'text', 'correct_answer']
 
 
 class QuizSerializer(serializers.ModelSerializer):
