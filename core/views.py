@@ -181,9 +181,32 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
     def get_permissions(self):
-        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+        # Only admins can create, update, delete users
+        if self.action in ['create', 'update', 'partial_update', 'destroy', 'change_role']:
             return [IsAdmin()]
         return [ReadOnly()]
+
+    @action(detail=True, methods=['patch'], url_path='change-role')
+    def change_role(self, request, pk=None):
+        user = self.get_object()
+        new_role = request.data.get("role")
+
+        valid_roles = ["admin", "mentor", "student", "user"]
+
+        if new_role not in valid_roles:
+            return Response(
+                {"error": "Invalid role. Valid roles: admin, mentor, student, user"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user.role = new_role
+        user.save()
+
+        return Response(
+            {"message": "Role updated successfully", "role": user.role},
+            status=status.HTTP_200_OK
+        )
+
 
 # -------------------------
 # Library Management
@@ -378,5 +401,4 @@ def home(request):
         if username
         else 'Welcome to the Learning & Wellbeing Hub API'
     )
-
 
