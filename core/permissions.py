@@ -3,7 +3,7 @@ from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 class IsAdmin(BasePermission):
     """Allow access only to Admin users."""
-    def has_permission(self, request, view):
+    def has_permission(self, request, _):
         return (
             request.user.is_authenticated
             and getattr(request.user, "role", None) == "admin"
@@ -19,7 +19,7 @@ class IsMentorAdminOrReadOnly(BasePermission):
         - Only mentors or admins can modify quiz content.
     """
 
-    def has_permission(self, request, view):
+    def has_permission(self, request, _):
         # Allow read-only access for everyone
         if request.method in SAFE_METHODS:
             return True
@@ -31,7 +31,7 @@ class IsMentorAdminOrReadOnly(BasePermission):
 
 class IsStudent(BasePermission):
     """Allow access only to Students."""
-    def has_permission(self, request, view):
+    def has_permission(self, request, _):
         return (
             request.user.is_authenticated
             and getattr(request.user, "role", None) == "student"
@@ -40,7 +40,7 @@ class IsStudent(BasePermission):
 
 class ReadOnly(BasePermission):
     """Allow read-only requests for any authenticated user."""
-    def has_permission(self, request, view):
+    def has_permission(self, request, _):
         return request.user.is_authenticated and request.method in SAFE_METHODS
 
 
@@ -53,7 +53,7 @@ class IsOwnerOrAdmin(BasePermission):
     Allow access if the user owns the object (e.g., journal entry, forum post)
     or is an Admin.
     """
-    def has_object_permission(self, request, view, obj):
+    def has_object_permission(self, request, _, obj):
         return (
             request.user.is_authenticated
             and (obj.user == request.user or getattr(request.user, "role", None) == "admin")
@@ -62,9 +62,9 @@ class IsOwnerOrAdmin(BasePermission):
 
 class IsMentor(BasePermission):
     """Allow access only to Mentors."""
-    def has_permission(self, request, view):
+    def has_permission(self, request, _):
         return (
-            request.user.is_authenticated
+            request.user.is_authenticated 
             and getattr(request.user, "role", None) == "mentor"
         )
 
@@ -73,7 +73,7 @@ class IsForumModeratorOrAdmin(BasePermission):
     """
     Allow forum moderation actions for Admins or Mentors (acting as moderators).
     """
-    def has_permission(self, request, view):
+    def has_permission(self, request, _):
         return (
             request.user.is_authenticated
             and getattr(request.user, "role", None) in ["admin", "mentor"]

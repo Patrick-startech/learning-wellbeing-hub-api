@@ -23,7 +23,7 @@ from .serializers import (
     SubmissionSerializer, MentorshipRequestSerializer,
     MoodSerializer, JournalSerializer, ForumPostSerializer
 )
-from .permissions import IsAdmin, IsMentorOrAdmin, IsStudent,IsMentorAdminOrReadOnly, ReadOnly, IsOwnerOrAdmin
+from .permissions import IsAdmin, IsStudent,IsMentorAdminOrReadOnly, ReadOnly, IsOwnerOrAdmin
 
 User = get_user_model()
 
@@ -199,7 +199,7 @@ class BookViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update']:
-            return [IsMentorOrAdmin()]
+            return [IsMentorAdminOrReadOnly()]
         if self.action == 'destroy':
             return [IsAdmin()]
         if self.action in ['borrow', 'return_book']:
