@@ -387,7 +387,8 @@ class ForumPostViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     
     def perform_create(self, serializer): 
-        serializer.save(author=self.request.user)
+       serializer.save(user=self.request.user)
+
 
 # -------------------------
 # Home & Auth Status

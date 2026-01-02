@@ -282,6 +282,7 @@ class ForumPostSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
             'likes',
+            'tags',
         ]
         read_only_fields = ['created_at', 'updated_at', 'user']
 
