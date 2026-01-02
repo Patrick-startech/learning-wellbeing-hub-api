@@ -17,7 +17,7 @@ from .views import (
     change_password,
 )
 
-app_name = "core"
+app_name = 'core'
 
 # DRF Router
 router = DefaultRouter()
