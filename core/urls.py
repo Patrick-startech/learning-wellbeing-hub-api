@@ -38,7 +38,7 @@ router.register('mentorshiprequest', MentorshipRequestViewSet, basename='mentors
 # Wellbeing endpoints
 router.register('moods', MoodViewSet, basename='mood')
 router.register('journals', JournalViewSet, basename='journal')
-router.register('forum', ForumPostViewSet, basename='forum')
+router.register('forumpost', ForumPostViewSet, basename='post')
 
 urlpatterns = [
     path('', include(router.urls)),  # <-- CLEAN: no prefix here
