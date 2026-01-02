@@ -151,9 +151,7 @@ class Submission(models.Model):
 class MentorshipRequest(models.Model):
     student = models.ForeignKey(User, related_name='requests', on_delete=models.CASCADE)
     mentor = models.ForeignKey(User, related_name='mentees', on_delete=models.CASCADE)
-
     message = models.TextField() # <-- NEW FIELD
-    
     status = models.CharField(
         max_length=20,
         choices=[('pending', 'Pending'), ('approved', 'Approved'), ('rejected', 'Rejected')],
@@ -192,6 +190,7 @@ class ForumPost(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
     title = models.CharField(max_length=200)
     content = models.TextField()
+    tags = models.JSONField(default=list) # Accepts a list of strings
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     likes = models.PositiveIntegerField(default=0)

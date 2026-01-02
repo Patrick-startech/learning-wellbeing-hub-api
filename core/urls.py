@@ -33,7 +33,7 @@ router.register('quizzes', QuizViewSet, basename='quiz')
 router.register('submissions', SubmissionViewSet, basename='submission')
 
 # Mentorship endpoints
-router.register('mentorship', MentorshipRequestViewSet, basename='mentorship')
+router.register('mentorshiprequest', MentorshipRequestViewSet, basename='mentorship-request')
 
 # Wellbeing endpoints
 router.register('moods', MoodViewSet, basename='mood')
