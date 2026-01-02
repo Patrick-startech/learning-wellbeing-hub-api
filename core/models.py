@@ -1,4 +1,5 @@
 from django.db import models
+import random
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 import datetime
@@ -39,6 +40,10 @@ class User(AbstractUser):
 # -------------------------
 # Library Models
 # -------------------------
+
+def generate_isbn():
+    """Generate a 13‑digit numeric ISBN."""
+    return ''.join([str(random.randint(0, 9)) for _ in range(13)])
 
 class Book(models.Model):
     title = models.CharField(max_length=200, db_index=True)
@@ -146,6 +151,9 @@ class Submission(models.Model):
 class MentorshipRequest(models.Model):
     student = models.ForeignKey(User, related_name='requests', on_delete=models.CASCADE)
     mentor = models.ForeignKey(User, related_name='mentees', on_delete=models.CASCADE)
+
+    message = models.TextField() # <-- NEW FIELD
+    
     status = models.CharField(
         max_length=20,
         choices=[('pending', 'Pending'), ('approved', 'Approved'), ('rejected', 'Rejected')],

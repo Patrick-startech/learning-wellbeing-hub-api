@@ -59,7 +59,7 @@ class BookSerializer(serializers.ModelSerializer):
             'summary',
             'created_at',
         ]
-        read_only_fields = ['created_at']
+        read_only_fields = ['created_at','isbn']
 
 
 class TransactionSerializer(serializers.ModelSerializer):
@@ -202,10 +202,9 @@ class SubmissionSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['submitted_at', 'score']
 
-
 class MentorshipRequestSerializer(serializers.ModelSerializer):
     student = serializers.StringRelatedField(read_only=True)
-    mentor = serializers.StringRelatedField()
+    mentor = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
 
     class Meta:
         model = MentorshipRequest
@@ -213,10 +212,22 @@ class MentorshipRequestSerializer(serializers.ModelSerializer):
             'id',
             'student',
             'mentor',
+            'message',
             'status',
             'requested_at',
         ]
-        read_only_fields = ['requested_at', 'student']
+        read_only_fields = ['requested_at', 'student', 'status']
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+        validated_data['student'] = request.user
+        return super().create(validated_data)
+
+
+class MentorshipRequestUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MentorshipRequest
+        fields = ['status']
 
 
 # -------------------------
@@ -249,7 +260,6 @@ class JournalSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'user',
-            'entry',
             'created_at',
         ]
         read_only_fields = ['created_at', 'user']

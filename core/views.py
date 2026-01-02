@@ -20,7 +20,7 @@ from .models import (
 from .serializers import (
     UserSerializer, BookSerializer, TransactionSerializer,
     ResourceSerializer, QuizSerializer, QuestionSerializer,
-    SubmissionSerializer, MentorshipRequestSerializer,
+    SubmissionSerializer, MentorshipRequestSerializer, MentorshipRequestUpdateSerializer,
     MoodSerializer, JournalSerializer, ForumPostSerializer
 )
 from .permissions import IsAdmin, IsStudent,IsMentorAdminOrReadOnly, ReadOnly, IsOwnerOrAdmin
@@ -329,13 +329,20 @@ class SubmissionViewSet(viewsets.ModelViewSet):
         if getattr(user, 'role', None) == 'admin':
             return Submission.objects.all()
         return Submission.objects.filter(user=user)
-
+    
 
 @extend_schema(tags=['Mentorship'])
 class MentorshipRequestViewSet(viewsets.ModelViewSet):
     queryset = MentorshipRequest.objects.all()
-    serializer_class = MentorshipRequestSerializer
-    permission_classes = [IsStudent]
+    permission_classes = [IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.action in ['update', 'partial_update']:
+            return MentorshipRequestUpdateSerializer
+        return MentorshipRequestSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(student=self.request.user)
 
 
 # -------------------------
