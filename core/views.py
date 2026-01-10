@@ -338,18 +338,31 @@ class SubmissionViewSet(viewsets.ModelViewSet):
 
         correct = 0
         total = quiz.questions.count()
+        feedback_list = []
 
         for question in quiz.questions.all():
             qid = str(question.id)
-            if qid in student_answers and student_answers[qid] == question.correct_answer:
+            student_answer = student_answers.get(qid)
+            is_correct = student_answer == question.correct_answer
+
+            if is_correct:
                 correct += 1
 
-        # Compute percentage AFTER scoring
-        percentage = round((correct / total) * 100) if total > 0 else 0
+            feedback_list.append({
+                "question_id": question.id,
+                "question": question.text,
+                "your_answer": student_answer,
+                "correct_answer": question.correct_answer,
+                "is_correct": is_correct
+            })
 
-        # Save score + percentage
+        percentage = round((correct / total) * 100) if total > 0 else 0
+        status = "pass" if percentage >= 50 else "fail"
+
         submission.score = correct
         submission.percentage = percentage
+        submission.status = status
+        submission.feedback = feedback_list
         submission.save()
 
 @extend_schema(tags=['Mentorship'])

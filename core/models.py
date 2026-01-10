@@ -141,13 +141,15 @@ class Question(models.Model):
 class Submission(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='submissions')
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='submissions')
-    answers = models.JSONField(default=dict) # <-- ADD THIS
+    answers = models.JSONField(default=dict)
     submitted_at = models.DateTimeField(auto_now_add=True)
     score = models.IntegerField(default=0)
-    percentage = models.IntegerField(default=0) # <-- NEW
+    percentage = models.IntegerField(default=0)
+    status = models.CharField(max_length=10, default="pending")  # pass/fail
+    feedback = models.JSONField(default=list)  # per-question feedback
 
     def __str__(self):
-        return f'{self.user.username} - {self.quiz.title} ({self.score} pts)'
+        return f'{self.user.username} - {self.quiz.title} ({self.score})'
 
 
 class MentorshipRequest(models.Model):
