@@ -329,7 +329,28 @@ class SubmissionViewSet(viewsets.ModelViewSet):
         if getattr(user, 'role', None) == 'admin':
             return Submission.objects.all()
         return Submission.objects.filter(user=user)
-    
+
+    def perform_create(self, serializer):
+        submission = serializer.save(user=self.request.user)
+
+        quiz = submission.quiz
+        student_answers = submission.answers
+
+        correct = 0
+        total = quiz.questions.count()
+
+        for question in quiz.questions.all():
+            qid = str(question.id)
+            if qid in student_answers and student_answers[qid] == question.correct_answer:
+                correct += 1
+
+        # Compute percentage AFTER scoring
+        percentage = round((correct / total) * 100) if total > 0 else 0
+
+        # Save score + percentage
+        submission.score = correct
+        submission.percentage = percentage
+        submission.save()
 
 @extend_schema(tags=['Mentorship'])
 class MentorshipRequestViewSet(viewsets.ModelViewSet):

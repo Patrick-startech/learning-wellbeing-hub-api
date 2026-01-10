@@ -189,7 +189,7 @@ class QuizSerializer(serializers.ModelSerializer):
 
 class SubmissionSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(read_only=True)
-    quiz = serializers.StringRelatedField(read_only=True)
+    quiz = serializers.PrimaryKeyRelatedField(queryset=Quiz.objects.all())
 
     class Meta:
         model = Submission
@@ -197,10 +197,16 @@ class SubmissionSerializer(serializers.ModelSerializer):
             'id',
             'user',
             'quiz',
+            'answers',
             'submitted_at',
             'score',
+            'percentage',
         ]
-        read_only_fields = ['submitted_at', 'score']
+        read_only_fields = ['submitted_at', 'score', 'percentage']
+
+    def create(self, validated_data):
+        validated_data['user'] = self.context['request'].user
+        return super().create(validated_data)
 
 class MentorshipRequestSerializer(serializers.ModelSerializer):
     student = serializers.StringRelatedField(read_only=True)
