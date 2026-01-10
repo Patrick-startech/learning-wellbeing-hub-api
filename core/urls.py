@@ -30,7 +30,7 @@ router.register('transactions', TransactionViewSet, basename='transaction')
 # Learning endpoints
 router.register('resources', ResourceViewSet, basename='resource')
 router.register('quizzes', QuizViewSet, basename='quiz')
-router.register('submissions', SubmissionViewSet, basename='submission')
+router.register('submission', SubmissionViewSet, basename='submission')
 
 # Mentorship endpoints
 router.register('mentorshiprequest', MentorshipRequestViewSet, basename='mentorship-request')
