@@ -145,7 +145,7 @@ class Submission(models.Model):
     submitted_at = models.DateTimeField(auto_now_add=True)
     score = models.IntegerField(default=0)
     percentage = models.IntegerField(default=0)
-    status = models.CharField(max_length=10, default="pending")  # pass/fail
+    status = models.CharField(max_length=10, choices=[("pass", "Pass"), ("fail", "Fail"), ("pending", "Pending")], default="pending")  # pass/fail
     feedback = models.JSONField(default=list)  # per-question feedback
 
     def __str__(self):

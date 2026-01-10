@@ -202,8 +202,9 @@ class SubmissionSerializer(serializers.ModelSerializer):
             'score',
             'percentage',
             'status',
+            'feedback',
         ]
-        read_only_fields = ['submitted_at', 'score', 'percentage', 'status']
+        read_only_fields = ['submitted_at', 'score', 'percentage', 'status', 'feedback']
 
     def create(self, validated_data):
         validated_data['user'] = self.context['request'].user
