@@ -334,12 +334,13 @@ class SubmissionViewSet(viewsets.ModelViewSet):
         submission = serializer.save(user=self.request.user)
 
         quiz = submission.quiz
-        student_answers = submission.answers
+        student_answers = submission.answers or {}
 
         correct = 0
         total = quiz.questions.count()
         feedback_list = []
 
+        # Loop through all questions in the quiz
         for question in quiz.questions.all():
             qid = str(question.id)
             student_answer = student_answers.get(qid)
@@ -356,14 +357,19 @@ class SubmissionViewSet(viewsets.ModelViewSet):
                 "is_correct": is_correct
             })
 
+        # Compute percentage safely
         percentage = round((correct / total) * 100) if total > 0 else 0
+
+        # Pass/fail logic
         status = "pass" if percentage >= 50 else "fail"
 
+        # Save results
         submission.score = correct
         submission.percentage = percentage
         submission.status = status
         submission.feedback = feedback_list
         submission.save()
+
 
 @extend_schema(tags=['Mentorship'])
 class MentorshipRequestViewSet(viewsets.ModelViewSet):
