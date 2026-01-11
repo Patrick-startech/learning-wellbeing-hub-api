@@ -247,7 +247,7 @@ class BookViewSet(viewsets.ModelViewSet):
         return Response({'message': f'You borrowed {book.title} successfully'})
 
     @extend_schema(summary='Return a borrowed book', tags=['Library'])
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post'], url_path='return')
     def return_book(self, request, pk=None):
         book = self.get_object()
 
