@@ -231,14 +231,14 @@ class BookViewSet(viewsets.ModelViewSet):
 
     @extend_schema(summary='Borrow a book', tags=['Library'])
     @action(detail=True, methods=['post'])
-    def borrow(self, request):
+    def borrow(self, request, pk=None):
         book = self.get_object()
 
         if book.copies_available < 1:
-            return Response({'error': 'No copies available'}, status=400)
+            return Response({'error': 'No copies available'}, status=status.HTTP_400_BAD_REQUEST)
 
         if Transaction.objects.filter(user=request.user, book=book, return_date__isnull=True).exists():
-            return Response({'error': 'You already borrowed this book'}, status=400)
+            return Response({'error': 'You already borrowed this book'}, status=status.HTTP_400_BAD_REQUEST)
 
         Transaction.objects.create(user=request.user, book=book)
         book.copies_available -= 1
@@ -246,10 +246,9 @@ class BookViewSet(viewsets.ModelViewSet):
 
         return Response({'message': f'You borrowed {book.title} successfully'})
 
-
     @extend_schema(summary='Return a borrowed book', tags=['Library'])
     @action(detail=True, methods=['post'])
-    def return_book(self, request):
+    def return_book(self, request, pk=None):
         book = self.get_object()
 
         transaction = Transaction.objects.filter(
@@ -257,7 +256,7 @@ class BookViewSet(viewsets.ModelViewSet):
         ).first()
 
         if not transaction:
-            return Response({'error': 'No active borrow found'}, status=400)
+            return Response({'error': 'No active borrow found'}, status=status.HTTP_400_BAD_REQUEST)
 
         transaction.return_date = timezone.now()
         transaction.save()
